@@ -11,7 +11,7 @@ print("Building for " + platform_name)
 
 setup(
     name='PDFlib',
-    version='5.1',
+    version='5.2',
     packages=['PDFlib'],
     package_data= {'PDFlib':['bind/tetlib_py.so', 'bind/tetlib_py2.so']}
 )
