@@ -5,9 +5,48 @@ elif sys.version_info <= (2, 0): from .bind.tetlib_py2 import *
 
 class TET(object):
 
+    CT_NORMAL =    0
+    CT_SEQ_START = 1
+    CT_SEQ_CONT =  10
+    CT_INSERTED =  12
+
+    ATTR_NONE =                   0x00000000
+    ATTR_SUB =                    0x00000001
+    ATTR_SUP =                    0x00000002
+    ATTR_DROPCAP =                0x00000004
+    ATTR_SHADOW =                 0x00000008
+    ATTR_DEHYPHENATION_PRE =      0x00000010
+    ATTR_DEHYPHENATION_ARTIFACT = 0x00000020
+    ATTR_DEHYPHENATION_POST =     0x00000040
+    ATTR_ARTIFACT =               0x00000100
+    ATTR_ANNOTATION =             0x00000200
+    ATTR_PATTERN =                0x00000400
+    ATTR_SOFTMASK =               0x00000800
+
+    TR_FILL =            0
+    TR_STROKE =          1
+    TR_FILLSTROKE =      2
+    TR_INVISIBLE =       3
+    TR_FILL_CLIP =       4
+    TR_STROKE_CLIP =     5
+    TR_FILLSTROKE_CLIP = 6
+    TR_CLIP =            7
+
+    IF_TIFF  = 10
+    IF_JPEG  = 20
+    IF_JP2   = 31
+    IF_JPF   = 32
+    IF_J2K   = 33
+    IF_JBIG2 = 50
+
     def __init__(self):
+        self.__p = None
         self.__p = TET_new()
-        TET_set_option(self.__p, "binding={python} objorient")
+        # don't set unicaplang, would be incompatible to TET 4.0
+        # without unicaplang get_text() can return UTF8 by default
+        # and UTF16/UTF32 on demand */
+        if self.__p:
+            TET_set_option(self.__p, "binding={python} objorient")
 
     # it is recommended not to use __del__ as it is not guaranteed
     # when this will be executed (see Python Esential Reference Page 94).
@@ -20,7 +59,7 @@ class TET(object):
     def delete(self):
         if (self.__p):
             TET_delete(self.__p)
-        self.__p = 0
+        self.__p = None
 
     def close_document(self, doc):
         TET_close_document(self.__p, doc)
@@ -88,9 +127,5 @@ class TET(object):
     def process_page(self, doc, pageno, optlist):
         return TET_process_page(self.__p, doc, pageno, optlist)
 
-    def get_xml_data(self, doc, optlist):
-        return TET_get_xml_data(self.__p, doc, optlist)
-
     def get_tetml(self, doc, optlist):
         return TET_get_tetml(self.__p, doc, optlist)
-
