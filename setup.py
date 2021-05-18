@@ -13,5 +13,5 @@ setup(
     name='PDFlib',
     version='5.2',
     packages=['PDFlib'],
-    package_data= {'PDFlib':['bind/tetlib_py.so', 'bind/tetlib_py2.so']}
+    include_package_data=True
 )
