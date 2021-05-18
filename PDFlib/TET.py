@@ -1,7 +1,4 @@
-import sys
-
-if sys.version_info >= (3, 0): from .bind.tetlib_py import *
-elif sys.version_info <= (2, 0): from .bind.tetlib_py2 import *
+from .bind.tetlib_py import *
 
 class TET(object):
 
