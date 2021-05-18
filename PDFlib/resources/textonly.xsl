@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-           Copyright (c) 2008-2015 PDFlib GmbH. All rights reserved.
+           Copyright (c) 2008-2019 PDFlib GmbH. All rights reserved.
     This software may not be copied or distributed except as expressly
     authorized by PDFlib GmbH's general license agreement or a custom
     license agreement signed by PDFlib GmbH.

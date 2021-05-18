@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="tet-xslt" default="all">
+
+	<description>
+	This Ant project runs all XSLT samples that come with TET.
+
+	By default, when invoked without any arguments, TETML output is
+	generated in two variants, with punctuation breaks and without, from
+	the TET-datasheet.pdf file in the bind/data directory.
+
+	The samples are grouped in two targets "sampleset1" and "sampleset2"
+	for the two TETML variants.
+		
+	It is possible to override the default PDF input file by specifying
+	the name of the desired PDF file in the property "input.pdf" on
+	Ant command line or in the file "build.properties".
+		
+	The output files are named after the basename of the input file,
+	e.g. TET-datasheet.metadata.txt, TET-datasheet.index.txt, etc.
+	</description>
+	
+	<property file="build.properties" />
+
+	<property name="bin.dir" location="../../bin" />
+	<property name="data.dir" location="../data" />
+	<property name="tet.exe" location="${bin.dir}/tet" />
+	<property name="input.pdf" location="${data.dir}/TET-datasheet.pdf" />
+	<basename property="input.basename" file="${input.pdf}" suffix=".pdf" /> 
+
+	<!--
+    	The TETML input file is generated in two variants, with punctuation
+    	breaks and without
+        -->
+	<property name="tetmlfile.pb" value="${input.basename}.pb.tetml" />
+	<property name="tetmlfile.nopb" value="${input.basename}.nopb.tetml" />
+
+	<!-- For selecting a table by number for the table target -->
+	<property name="table.table-number" value="1" />
+	<property name="table.page-number" value="0" />
+
+	<!-- XSLT parameters for the fontfilter example -->
+	<property name="fontfilter.font" value="ThesisAntiqua-Bold" />
+	<property name="fontfilter.min-size" value="10.0" />
+
+	<!-- XSLT parameters for the tetml2html example -->
+	<property name="tetml2html.debug" value="0" />
+	<property name="tetml2html.bookmark-toc" value="0" />
+	<property name="tetml2html.toc-generate" value="1" />
+	<property name="tetml2html.toc-exclude-min" value="3" />
+	<property name="tetml2html.toc-exclude-max" value="4" />
+	<property name="tetml2html.h1.min-size" value="30" />
+	<property name="tetml2html.h1.max-size" value="10000" />
+	<property name="tetml2html.h1.font-name" value="ThesisAntiqua-Bold" />
+	<property name="tetml2html.h2.min-size" value="24" />
+	<property name="tetml2html.h2.max-size" value="30" />
+	<property name="tetml2html.h2.font-name" value="TheSansExtraLight-Italic" />
+	<property name="tetml2html.h3.min-size" value="14" />
+	<property name="tetml2html.h3.max-size" value="24" />
+	<property name="tetml2html.h3.font-name" value="ThesisAntiqua-Bold" />
+	<property name="tetml2html.h4.min-size" value="8" />
+	<property name="tetml2html.h4.max-size" value="14" />
+	<property name="tetml2html.h4.font-name" value="ThesisAntiqua-Bold" />
+	<!-- "Impossible" values for unneeded heading level -->
+	<property name="tetml2html.h5.min-size" value="10001" />
+	<property name="tetml2html.h5.max-size" value="10000" />
+	<property name="tetml2html.h5.font-name" value="" />
+
+	<target name="all" depends="sampleset1, sampleset2" />
+
+	<!-- Execute all scripts for TETML input with punctuation breaks -->
+	<target name="sampleset1" depends="tetml.pb"
+		description="Run XSLT scripts for TETML input with punctuation breaks: concordance.xsl, index.xsl, table.xsl, metadata.xsl, fontfilter.xsl, fontstat.xsl, fontfinder.xsl">
+		<xslt in="${tetmlfile.pb}" style="concordance.xsl" out="${input.basename}.concordance.txt" />
+		
+		<xslt in="${tetmlfile.pb}" style="index.xsl" out="${input.basename}.index.txt" />
+		
+		<xslt in="${tetmlfile.pb}" style="table.xsl" out="${input.basename}.table.csv">
+			<param name="table-number" expression="${table.table-number}" />
+			<param name="page-number" expression="${table.page-number}" />
+		</xslt>
+		
+		<xslt in="${tetmlfile.pb}" style="metadata.xsl" out="${input.basename}.metadata.txt" />
+		
+		<xslt in="${tetmlfile.pb}" style="fontfilter.xsl" out="${input.basename}.fontfilter.txt">
+			<param name="font-name" expression="${fontfilter.font}" />
+			<param name="min-size" expression="${fontfilter.min-size}" />
+		</xslt>
+		
+		<xslt in="${tetmlfile.pb}" style="fontstat.xsl" out="${input.basename}.fontstat.txt" />
+		
+		<xslt in="${tetmlfile.pb}" style="fontfinder.xsl" out="${input.basename}.fontfinder.txt" />
+	</target>
+
+	<!-- Execute all scripts for TETML input without punctuation breaks -->
+	<target name="sampleset2" depends="tetml.nopb"
+		description="Run XSLT scripts for TETML input without punctuation breaks: tetml2html.xsl, textonly.xsl">
+		<xslt in="${tetmlfile.nopb}" style="textonly.xsl" out="${input.basename}.textonly.txt" />
+		
+		<xslt in="${tetmlfile.nopb}" style="tetml2html.xsl" out="${input.basename}.tetml2html.html">
+			<param name="debug" expression="${tetml2html.debug}" />
+			<param name="toc-generate" expression="${tetml2html.toc-generate}" />
+			<param name="toc-exclude-min" expression="${tetml2html.toc-exclude-min}" />
+			<param name="toc-exclude-max" expression="${tetml2html.toc-exclude-max}" />
+			<param name="h1.min-size" expression="${tetml2html.h1.min-size}" />
+			<param name="h1.max-size" expression="${tetml2html.h1.max-size}" />
+			<param name="h1.font-name" expression="${tetml2html.h1.font-name}" />
+			<param name="h2.min-size" expression="${tetml2html.h2.min-size}" />
+			<param name="h2.max-size" expression="${tetml2html.h2.max-size}" />
+			<param name="h2.font-name" expression="${tetml2html.h2.font-name}" />
+			<param name="h3.min-size" expression="${tetml2html.h3.min-size}" />
+			<param name="h3.max-size" expression="${tetml2html.h3.max-size}" />
+			<param name="h3.font-name" expression="${tetml2html.h3.font-name}" />
+			<param name="h4.min-size" expression="${tetml2html.h4.min-size}" />
+			<param name="h4.max-size" expression="${tetml2html.h4.max-size}" />
+			<param name="h4.font-name" expression="${tetml2html.h4.font-name}" />
+			<param name="h5.min-size" expression="${tetml2html.h5.min-size}" />
+			<param name="h5.max-size" expression="${tetml2html.h5.max-size}" />
+			<param name="h5.font-name" expression="${tetml2html.h5.font-name}" />
+		</xslt>
+	</target>
+
+	<!-- Generate wordplus TETML output with punctuation breaks. -->
+	<target name="tetml.pb">
+		<exec executable="${tet.exe}">
+			<arg value="--image" />
+			<arg value="--tetml" />
+			<arg value="wordplus" />
+			<arg value="-o" />
+			<arg value="${tetmlfile.pb}" />
+			<arg value="${input.pdf}" />
+		</exec>
+	</target>
+
+	<!-- Generate wordplus TETML output without punctuation breaks. Switch on the
+	     list detection, which detects the bulleted lists in the default TET-datasheet.pdf
+	     input file. The tetml2html.xsl script is able to transform this into
+	     HTML bulleted lists. -->
+	<target name="tetml.nopb">
+		<exec executable="${tet.exe}">
+			<arg value="--image" />
+			<arg value="--tetml" />
+			<arg value="wordplus" />
+			<arg value="--pageopt" />
+			<arg value="contentanalysis={punctuationbreaks=false} structureanalysis={list=true bullets={{fontname=TheSansSemiLight-Caps bulletchars={U+003E}}}}" />
+			<arg value="-o" />
+			<arg value="${tetmlfile.nopb}" />
+			<arg value="${input.pdf}" />
+		</exec>
+	</target>
+
+	<!--
+        The "runxslt" Java program can also be used to run the XSLT samples.
+        -->
+	<target name="runxslt">
+		<javac srcdir="." includes="runxslt.java" includeantruntime="false" />
+	</target>
+	
+	<target name="dorunxslt" depends="runxslt, tetml.pb, tetml.nopb">
+		<java classname="runxslt" classpath="${basedir}" />
+	</target>
+
+	<target name="clean">
+		<delete file="${input.basename}.concordance.txt" />
+		<delete file="${input.basename}.index.txt" />
+		<delete file="${input.basename}.table.csv" />
+		<delete file="${input.basename}.textonly.txt" />
+		<delete file="${input.basename}.metadata.txt" />
+		<delete file="${input.basename}.fontfilter.txt" />
+		<delete file="${input.basename}.fontstat.txt" />
+		<delete file="${input.basename}.fontfinder.txt" />
+		<delete file="${input.basename}.tetml2html.html" />
+		<delete file="${tetmlfile.pb}" />
+		<delete file="${tetmlfile.nopb}" />
+		<delete dir="${basedir}">
+		      <include name="${input.basename}*.tif"/>
+		      <include name="${input.basename}*.jpg"/>
+		      <include name="runxslt*.class"/>
+		</delete>
+	</target>
+</project>
