@@ -1,6 +1,6 @@
 from PDFlib.TET import TET
 from lxml import etree
-license_key = '***REMOVED***'
+license_key = 'L500902-010300-742594-KJZM72-NMYX52'
 
 class TETDocument:
     def __init__(self, file, doc_options, page_options):

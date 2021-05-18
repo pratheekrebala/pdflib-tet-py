@@ -1,0 +1,2 @@
+include PDFlib/resources/*.xsl
+include PDFlib/bind/*.so
