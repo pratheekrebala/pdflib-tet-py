@@ -63,26 +63,59 @@ def read_bad_table(csv, sep='|', squeeze=True):
     return df
 
 """
-    Convert tables embedded in TETML into pandas dataframes
+    Convert tables embedded in TETML into csv
 """
-def extract_table(tree):
+def make_csv(tree):
     namespace = {None: 'http://www.pdflib.com/XML/TET5/TET-5.0'}
     table_transform = etree.XSLT(etree.parse(str(resource_dir / 'table.xsl')))
 
-    tables = []
+#    tables = []
     csv = ''
 
-    for page in tree.findall('.//Page', namespace):
+    for page in tree.iterfind('.//Page', namespace):
         page_number = page.get('number')
         table_number = 0
-        for _ in page.findall('.//Table', namespace):
+        for _ in page.iterfind('.//Table', namespace):
             table_number += 1
             params = {'page-number': str(page_number), 'table-number': str(table_number), 'separator-char': "'|'"}
 
             table_csv = str(table_transform(tree, **params))
             csv += table_csv
-            table = read_bad_table(table_csv, squeeze=True)
-            tables.append(table)
+            yield table_csv
+            #table = read_bad_table(table_csv, squeeze=True)
+            #tables.append(table)
+            #yield table
     
-    supertable = read_bad_table(csv, squeeze=False)
-    return supertable, tables
+    #supertable = read_bad_table(csv, squeeze=False)
+    #return supertable, tables
+
+"""
+    Extract table structure from tetml
+"""
+def extract_table(tetml, para_as_cell=True):
+    tree = etree.fromstring(tetml)
+    namespace = {None: 'http://www.pdflib.com/XML/TET5/TET-5.0'}
+    for page in tree.iterfind('.//Page', namespace):
+        page_number = page.get('number')
+        for table in page.iterfind('.//Table', namespace):
+            rows = []
+            for row in table.iterfind('.//Row', namespace):
+                _row = []
+                for cell in row.iterfind('.//Cell', namespace):
+                    _cells = []
+                    for para in cell.iterfind('.//Para', namespace):
+                        text = [x.text for x in para.iterfind('.//Text', namespace)]
+                        _cells.append(' '.join(text))
+                    
+                    if not para_as_cell:
+                        _cells = ['\n'.join(_cells)]
+
+                    if len(_cells) == 0:
+                        _cells.append('')
+
+                    _row.extend(_cells)
+                _row = [_r.strip() for _r in _row]
+                if not set(_row) == {''}:
+                    rows.append(_row)
+            yield page_number, rows, page
+            # TODO Yield BBOX elements to validate
